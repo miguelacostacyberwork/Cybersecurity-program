@@ -1,0 +1,158 @@
+#Import Data,and edit labels
+import pandas as pd
+df = pd.read_csv('/Users/cirioarman/Desktop/Data Analysis Project Docs/spam.csv', encoding='latin-1')
+print(df.head())
+df = df.rename(columns={'v1': 'event_classification', 'v2': 'message'})
+print(df)
+
+#Calculation of Ham and Spam in V1, variables
+#Bar Chart
+import matplotlib.pyplot as plt
+
+df['event_classification'].value_counts().plot(kind='bar')
+
+plt.title("Bar chart of event_classification")
+plt.xlabel("Categories")
+plt.ylabel("Count")
+plt.show()
+
+#Pie Chart
+import matplotlib.pyplot as plt
+
+counts = df['event_classification'].value_counts()
+
+fig, ax = plt.subplots()
+
+ax.pie(counts, labels=counts.index, startangle=90, autopct='%1.1f%%')
+ax.set_title("Pie chart of event_classification")
+
+plt.show()
+
+#Message entries where event_classification is spam
+spam_messages = df[df['event_classification'] == 'spam']['message'].tolist()
+
+for i, message in enumerate(spam_messages, 1):
+    print(f'Message {i}: {message}')
+
+
+#Classification of spam texts including Hyperlinks
+import re
+
+spam_mask = (df['event_classification'] == 'spam')
+
+spam_messages = df.loc[spam_mask, 'message']
+
+pattern = r'http[s]?://'
+
+contains_links_mask = spam_messages.str.contains(pattern)
+
+spam_with_links = spam_messages[contains_links_mask]
+
+spam_with_links_list = spam_with_links.tolist()
+
+for i, message in enumerate(spam_with_links_list, 1):
+    print(f'Message {i}: {message}')
+
+import re
+
+spam_mask = (df['event_classification'] == 'spam')
+
+spam_messages = df.loc[spam_mask, 'message']
+
+pattern = r'www.'
+
+contains_links_mask = spam_messages.str.contains(pattern)
+
+spam_with_links = spam_messages[contains_links_mask]
+
+spam_with_links_list = spam_with_links.tolist()
+
+for i, message in enumerate(spam_with_links_list, 1):
+    print(f'Message {i}: {message}')
+
+#Caluclation of Spam messages with and without links
+import re
+
+spam_mask = (df['event_classification'] == 'spam')
+spam_messages = df.loc[spam_mask, 'message']
+
+
+pattern = r'http[s]?://'
+contains_links_mask = spam_messages.str.contains(pattern)
+spam_with_links = spam_messages[contains_links_mask]
+
+
+pattern = r'www.'
+contains_links_mask = spam_messages.str.contains(pattern)
+spam_with_links_www = spam_messages[contains_links_mask]
+
+
+spam_with_links = pd.concat([spam_with_links, spam_with_links_www]).drop_duplicates().reset_index(drop=True)
+
+print(f'Number of spam messages with links: {len(spam_with_links)}')
+
+
+spam_without_links = len(spam_messages) - len(spam_with_links)
+print(f'Number of spam messages without links: {spam_without_links}')
+
+#Pie Chart classification of spam with and without hyperlinks
+import matplotlib.pyplot as plt
+
+
+spam_with_links = 88
+spam_without_links = 659
+
+labels = ['Spam with links', 'Spam without links']
+sizes = [spam_with_links, spam_without_links]
+
+
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+ax1.axis('equal')
+
+plt.show()
+
+#Mchine Learning Regression Model "3 year expand" SCIKIT-LEARN
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+
+data = {'Messages': [5573], 'Spam': [747], 'Link': [88]}
+df = pd.DataFrame(data)
+
+
+df['Spam_Proportion'] = df['Spam'] / df['Messages']
+df['Link_Proportion'] = df['Link'] / df['Messages']
+
+
+X = np.array(df[['Spam_Proportion']]).reshape(-1, 1)
+y = np.array(df['Link_Proportion']).reshape(-1, 1)
+
+
+model = LinearRegression()
+
+
+model.fit(X, y)
+
+
+spam_proportion_3years = df['Spam_Proportion'].values * 3
+predicted_link_proportion_3years = model.predict(spam_proportion_3years.reshape(-1,1))
+
+print(predicted_link_proportion_3years)
+
+
+import matplotlib.pyplot as plt
+
+
+predicted_link_proportion = model.predict(X)
+
+
+plt.scatter(X, y, color='blue', label='Actual')
+plt.scatter(X, predicted_link_proportion, color='red', label='Predicted')
+plt.title('Spam Proportion vs Link Proportion')
+plt.xlabel('Spam Proportion')
+plt.ylabel('Link Proportion')
+plt.legend()
+plt.show()
